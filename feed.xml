@@ -5,20 +5,100 @@
   <id>http://blog.url.com/</id>
   <link href="http://blog.url.com/"/>
   <link href="http://blog.url.com/feed.xml" rel="self"/>
-  <updated>2011-12-31T19:00:00-05:00</updated>
+  <updated>2015-05-10T17:39:00-04:00</updated>
   <author>
     <name>Blog Author</name>
   </author>
   <entry>
-    <title>Example Article</title>
-    <link rel="alternate" href="http://blog.url.com/2012/01/01/example-article.html"/>
-    <id>http://blog.url.com/2012/01/01/example-article.html</id>
-    <published>2011-12-31T19:00:00-05:00</published>
-    <updated>2015-05-10T17:19:50-04:00</updated>
+    <title>Initial Commit</title>
+    <link rel="alternate" href="http://blog.url.com/2015/05/10/initial-commit.html"/>
+    <id>http://blog.url.com/2015/05/10/initial-commit.html</id>
+    <published>2015-05-10T17:39:00-04:00</published>
+    <updated>2015-05-10T17:55:40-04:00</updated>
     <author>
       <name>Article Author</name>
     </author>
-    <content type="html">&lt;p&gt;This is an example article. You probably want to delete it and write your own articles!&lt;/p&gt;
+    <content type="html">&lt;p&gt;Hi there! I just set this blog up to more effectively structure my continuing education. My goals here are simple: to write about things that I'm learning and to consolidate my efforts to build things.&lt;/p&gt;
+
+&lt;p&gt;I just started digging into D3.js and I've been blown away by the demos that I've seen online. I just copied and pasted mbostock's demo below (https://github.com/mbostock) to make sure that I've set up the blog correctly. My plan is to start learning D3 and post little visualizations as I build them.&lt;/p&gt;
+
+&lt;p&gt;Right now, my immediate goal is to make the site look somewhat in conformity to the 21st century. I'm going to do a boilerplate install of Bootstrap soon, but eventually I'd like to try and put my own custom spin on the generic blog layout. If for some reason you find yourself here, thanks for reading, and I would love to hear any feedback you have! You can find me at https://github.com/aktwo.&lt;/p&gt;
+
+&lt;script&gt;
+
+var width = 960,
+    height = 500;
+
+var nodes = d3.range(200).map(function() { return {radius: Math.random() * 12 + 4}; }),
+    root = nodes[0],
+    color = d3.scale.category10();
+
+root.radius = 0;
+root.fixed = true;
+
+var force = d3.layout.force()
+    .gravity(0.05)
+    .charge(function(d, i) { return i ? 0 : -2000; })
+    .nodes(nodes)
+    .size([width, height]);
+
+force.start();
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+svg.selectAll("circle")
+    .data(nodes.slice(1))
+  .enter().append("circle")
+    .attr("r", function(d) { return d.radius; })
+    .style("fill", function(d, i) { return color(i % 3); });
+
+force.on("tick", function(e) {
+  var q = d3.geom.quadtree(nodes),
+      i = 0,
+      n = nodes.length;
+
+  while (++i &lt; n) q.visit(collide(nodes[i]));
+
+  svg.selectAll("circle")
+      .attr("cx", function(d) { return d.x; })
+      .attr("cy", function(d) { return d.y; });
+});
+
+svg.on("mousemove", function() {
+  var p1 = d3.mouse(this);
+  root.px = p1[0];
+  root.py = p1[1];
+  force.resume();
+});
+
+function collide(node) {
+  var r = node.radius + 16,
+      nx1 = node.x - r,
+      nx2 = node.x + r,
+      ny1 = node.y - r,
+      ny2 = node.y + r;
+  return function(quad, x1, y1, x2, y2) {
+    if (quad.point &amp;&amp; (quad.point !== node)) {
+      var x = node.x - quad.point.x,
+          y = node.y - quad.point.y,
+          l = Math.sqrt(x * x + y * y),
+          r = node.radius + quad.point.radius;
+      if (l &lt; r) {
+        l = (l - r) / l * .5;
+        node.x -= x *= l;
+        node.y -= y *= l;
+        quad.point.x += x;
+        quad.point.y += y;
+      }
+    }
+    return x1 &gt; nx2 || x2 &lt; nx1 || y1 &gt; ny2 || y2 &lt; ny1;
+  };
+}
+
+&lt;/script&gt;
+
 </content>
   </entry>
 </feed>
